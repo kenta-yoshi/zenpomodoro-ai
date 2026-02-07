@@ -1,0 +1,7 @@
+{
+  "name": "ZenPomodoro AI",
+  "description": "A high-performance Pomodoro timer with AI-driven focus insights and task optimization using Gemini.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
