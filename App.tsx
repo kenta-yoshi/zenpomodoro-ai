@@ -25,6 +25,30 @@ const App: React.FC = () => {
     audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
   }, []);
 
+  const handleTimerComplete = useCallback(() => {
+    setIsActive(false);
+    audioRef.current?.play();
+
+    // Update active task pomodoro count if it was a WORK session
+    if (mode === TimerMode.WORK && activeTaskId) {
+      setTasks(prev => prev.map(t =>
+        t.id === activeTaskId ? { ...t, pomodoros: t.pomodoros + 1 } : t
+      ));
+    }
+
+    // Auto switch mode logic (simple)
+    if (mode === TimerMode.WORK) {
+      setMode(TimerMode.SHORT_BREAK);
+      setTimeLeft(TIMER_CONFIG[TimerMode.SHORT_BREAK]);
+    } else {
+      setMode(TimerMode.WORK);
+      setTimeLeft(TIMER_CONFIG[TimerMode.WORK]);
+    }
+
+    // Refresh AI Insight
+    refreshAIInsight();
+  }, [mode, activeTaskId]);
+
   // Timer Logic
   useEffect(() => {
     if (isActive && timeLeft > 0) {
@@ -45,31 +69,7 @@ const App: React.FC = () => {
         window.clearInterval(timerRef.current);
       }
     };
-  }, [isActive, timeLeft]);
-
-  const handleTimerComplete = useCallback(() => {
-    setIsActive(false);
-    audioRef.current?.play();
-    
-    // Update active task pomodoro count if it was a WORK session
-    if (mode === TimerMode.WORK && activeTaskId) {
-      setTasks(prev => prev.map(t => 
-        t.id === activeTaskId ? { ...t, pomodoros: t.pomodoros + 1 } : t
-      ));
-    }
-
-    // Auto switch mode logic (simple)
-    if (mode === TimerMode.WORK) {
-      setMode(TimerMode.SHORT_BREAK);
-      setTimeLeft(TIMER_CONFIG[TimerMode.SHORT_BREAK]);
-    } else {
-      setMode(TimerMode.WORK);
-      setTimeLeft(TIMER_CONFIG[TimerMode.WORK]);
-    }
-    
-    // Refresh AI Insight
-    refreshAIInsight();
-  }, [mode, activeTaskId]);
+  }, [isActive, timeLeft, handleTimerComplete]);
 
   const toggleTimer = () => setIsActive(!isActive);
 
